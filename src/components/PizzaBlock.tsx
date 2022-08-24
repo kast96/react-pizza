@@ -1,28 +1,43 @@
-import { FC } from "react"
+import { FC, useState } from "react"
 
 type PropsType = {
   title: string
   price: number
+  imageUrl: string
+  sizes: Array<number>
+  types: Array<number>
 }
 
-export const PizzaBlock: FC<PropsType> = ({title, price}) => {
+export const PizzaBlock: FC<PropsType> = ({title, price, imageUrl, sizes, types}) => {
+  const [activeType, setActiveType] = useState(0)
+  const [activeSize, setActiveSize] = useState(0)
+
+  const typeNames = ['тонкое', 'традиционное']
+
+  const onClickType = (index: number) => () => {
+    if (index === activeType) return
+    setActiveType(index)
+  }
+
+  const onClickSize = (index: number) => () => {
+    if (index === activeSize) return
+    setActiveSize(index)
+  }
+
   return (
     <div className="pizza-block">
-      <img
-        className="pizza-block__image"
-        src="https://dodopizza-a.akamaihd.net/static/Img/Products/Pizza/ru-RU/b750f576-4a83-48e6-a283-5a8efb68c35d.jpg"
-        alt="Pizza"
-      />
+      <img className="pizza-block__image" src={imageUrl} alt={title} />
       <h4 className="pizza-block__title">{title}</h4>
       <div className="pizza-block__selector">
         <ul>
-          <li className="active">тонкое</li>
-          <li>традиционное</li>
+          {types.map((type, key) => 
+            <li key={type} className={key === activeType ? 'active' : ''} onClick={onClickType(key)}>{typeNames[type]}</li>
+          )}
         </ul>
         <ul>
-          <li className="active">26 см.</li>
-          <li>30 см.</li>
-          <li>40 см.</li>
+          {sizes.map((size, key) => 
+            <li key={size} className={key === activeSize ? 'active' : ''} onClick={onClickSize(key)}>{size} см.</li>
+          )}
         </ul>
       </div>
       <div className="pizza-block__bottom">
