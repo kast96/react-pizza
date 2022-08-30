@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Categories } from "../components/Categories"
 import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
 import { Skeleton } from "../components/PizzaBlock/Skeleton"
-import { Sort } from "../components/Sort"
+import { Sort, SortType } from "../components/Sort"
 
 type ItemsType = {
 	id: number
@@ -18,22 +18,30 @@ type ItemsType = {
 export const Home = () => {
   const [items, setItems] = useState<Array<ItemsType>>([])
 	const [isLoading, setIsloading] = useState(true)
+	const [categotyId, setCategoryId] = useState(0)
+	const [sortType, setSortType] = useState<SortType>({
+		name: 'популярности',
+		sortProperty: 'rating',
+	})
 
 	useEffect(() => {
-		fetch('https://63085e6b722029d9ddcd2b4a.mockapi.io/items')
-			.then(response => response.json())
-			.then(json => {
-				setItems(json)
-				setIsloading(false)
+		setIsloading(true)
+
+		const sortBy = sortType.sortProperty.replace('-', '')
+		const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc'
+		const category = categotyId > 0 ? `category=${categotyId}` : ''
+
+		fetch(`https://63085e6b722029d9ddcd2b4a.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}`).then(response => response.json()).then(json => {
+			setItems(json)
+			setIsloading(false)
 		})
-		window.scrollTo(0, 0)
-	}, [])
+	}, [categotyId, sortType])
 
   return (
     <div className="container">
       <div className="content__top">
-		  	<Categories />
-				<Sort />
+		  	<Categories value={categotyId} onClickCategory={(index: number) => setCategoryId(index)} />
+				<Sort value={sortType} onChangeSort={(sortType: SortType) => setSortType(sortType)} />
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">
