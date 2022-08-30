@@ -20,14 +20,17 @@ export const Home = () => {
 	const [isLoading, setIsloading] = useState(true)
 
 	useEffect(() => {
-		fetch('https://63085e6b722029d9ddcd2b4a.mockapi.io/items').then(response => response.json()).then(json => {
-			setItems(json)
-			setIsloading(false)
+		fetch('https://63085e6b722029d9ddcd2b4a.mockapi.io/items')
+			.then(response => response.json())
+			.then(json => {
+				setItems(json)
+				setIsloading(false)
 		})
+		window.scrollTo(0, 0)
 	}, [])
 
   return (
-    <>
+    <div className="container">
       <div className="content__top">
 		  	<Categories />
 				<Sort />
@@ -45,6 +48,6 @@ export const Home = () => {
 					)
 				}
 		  </div>
-    </>
+		</div>
   )
 }
