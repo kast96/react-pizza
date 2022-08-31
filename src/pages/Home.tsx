@@ -29,6 +29,8 @@ export const Home: FC<PropsType> = ({searchValue}) => {
 		name: 'популярности',
 		sortProperty: 'rating',
 	})
+	const itemsLimit = 4
+	const [itemsCount, setItemsCount] = useState(0)
 
 	useEffect(() => {
 		setIsloading(true)
@@ -38,8 +40,9 @@ export const Home: FC<PropsType> = ({searchValue}) => {
 		const category = categotyId > 0 ? `&category=${categotyId}` : ''
 		const search = searchValue ? `&search=${searchValue}` : ''
 
-		fetch(`https://63085e6b722029d9ddcd2b4a.mockapi.io/items?page=${currentPage}&limit=4${category}&sortBy=${sortBy}&order=${order}${search}`).then(response => response.json()).then(json => {
-			setItems(json)
+		fetch(`https://63085e6b722029d9ddcd2b4a.mockapi.io/items?page=${currentPage}&limit=${itemsLimit}${category}&sortBy=${sortBy}&order=${order}${search}`).then(response => response.json()).then(json => {
+			setItems(json.items)
+			setItemsCount(json.count)
 			setIsloading(false)
 		})
 	}, [categotyId, sortType, searchValue, currentPage])
@@ -53,7 +56,7 @@ export const Home: FC<PropsType> = ({searchValue}) => {
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">
 				{isLoading &&
-					[...new Array(12)].map((_, key) => 
+					[...new Array(itemsLimit)].map((_, key) => 
 						<Skeleton key={key} />
 					)
 				}
@@ -61,7 +64,7 @@ export const Home: FC<PropsType> = ({searchValue}) => {
 					items.map(pizza => <PizzaBlock key={pizza.id} title={pizza.title} price={pizza.price} imageUrl={pizza.imageUrl} sizes={pizza.sizes} types={pizza.types} />)
 				}
 		  </div>
-			<Pagination onChangePage={number => setCurrentPage(number)} />
+			<Pagination itemsLimit={itemsLimit} itemsCount={itemsCount} onChangePage={number => setCurrentPage(number)} />
 		</div>
   )
 }
