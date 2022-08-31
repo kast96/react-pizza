@@ -1,12 +1,11 @@
-import { Dispatch, FC, SetStateAction } from 'react'
+import { FC, useContext } from 'react'
+import { SearchContext } from '../../App'
 import s from './Search.module.scss'
 
-type PropsType = {
-	searchValue: string
-	setSearchValue: Dispatch<SetStateAction<string>>
-}
 
-export const Search: FC<PropsType> = ({searchValue, setSearchValue}) => {
+export const Search: FC = () => {
+	const {searchValue, setSearchValue} = useContext(SearchContext)
+
 	return (
 		<div className={s.root}>
 			<svg className={s.icon} enableBackground="new 0 0 32 32" id="EditableLine" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">

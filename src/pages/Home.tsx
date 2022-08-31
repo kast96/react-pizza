@@ -1,4 +1,5 @@
-import { FC, useEffect, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
+import { SearchContext } from "../App"
 import { Categories } from "../components/Categories"
 import { Pagination } from "../components/Pagination/Pagination"
 import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
@@ -16,11 +17,7 @@ type ItemsType = {
 	rating: number
 }
 
-type PropsType = {
-	searchValue: string
-}
-
-export const Home: FC<PropsType> = ({searchValue}) => {
+export const Home: FC = () => {
   const [items, setItems] = useState<Array<ItemsType>>([])
 	const [isLoading, setIsloading] = useState(true)
 	const [categotyId, setCategoryId] = useState(0)
@@ -31,6 +28,8 @@ export const Home: FC<PropsType> = ({searchValue}) => {
 	})
 	const itemsLimit = 4
 	const [itemsCount, setItemsCount] = useState(0)
+
+	const {searchValue} = useContext(SearchContext)
 
 	useEffect(() => {
 		setIsloading(true)
