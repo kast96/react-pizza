@@ -9,6 +9,7 @@ export type SortType = {
 export type FilterState = {
   categoryId: number
   sort: SortType
+  currentPage: number
 }
 
 const initialState: FilterState = {
@@ -16,7 +17,8 @@ const initialState: FilterState = {
   sort: {
     name: 'популярности',
 		sortProperty: 'rating',
-  }
+  },
+  currentPage: 1,
 }
 
 export const filterSlice = createSlice({
@@ -29,9 +31,12 @@ export const filterSlice = createSlice({
     setSort: (state, action: PayloadAction<SortType>) => {
       state.sort = action.payload
     },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload
+    }
   },
 })
 
-export const { setCategoryId, setSort } = filterSlice.actions
+export const { setCategoryId, setSort, setCurrentPage } = filterSlice.actions
 
 export default filterSlice.reducer
