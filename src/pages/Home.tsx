@@ -1,10 +1,13 @@
 import { FC, useContext, useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { SearchContext } from "../App"
 import { Categories } from "../components/Categories"
 import { Pagination } from "../components/Pagination/Pagination"
 import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
 import { Skeleton } from "../components/PizzaBlock/Skeleton"
-import { Sort, SortType } from "../components/Sort"
+import { Sort } from "../components/Sort"
+import { setCategoryId } from "../redux/slices/filterSlice"
+import { RootState } from "../redux/store"
 
 type ItemsType = {
 	id: number
@@ -20,22 +23,21 @@ type ItemsType = {
 export const Home: FC = () => {
   const [items, setItems] = useState<Array<ItemsType>>([])
 	const [isLoading, setIsloading] = useState(true)
-	const [categotyId, setCategoryId] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
-	const [sortType, setSortType] = useState<SortType>({
-		name: 'популярности',
-		sortProperty: 'rating',
-	})
 	const itemsLimit = 4
 	const [itemsCount, setItemsCount] = useState(0)
+
+	const categotyId = useSelector((state: RootState) => state.filter.categoryId)
+	const sortProperty = useSelector((state: RootState) => state.filter.sort.sortProperty)
+	const dispatch = useDispatch()
 
 	const {searchValue} = useContext(SearchContext)
 
 	useEffect(() => {
 		setIsloading(true)
 
-		const sortBy = sortType.sortProperty.replace('-', '')
-		const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc'
+		const sortBy = sortProperty.replace('-', '')
+		const order = sortProperty.includes('-') ? 'asc' : 'desc'
 		const category = categotyId > 0 ? `&category=${categotyId}` : ''
 		const search = searchValue ? `&search=${searchValue}` : ''
 
@@ -44,13 +46,13 @@ export const Home: FC = () => {
 			setItemsCount(json.count)
 			setIsloading(false)
 		})
-	}, [categotyId, sortType, searchValue, currentPage])
+	}, [categotyId, sortProperty, searchValue, currentPage])
 
   return (
     <div className="container">
       <div className="content__top">
-		  	<Categories value={categotyId} onClickCategory={(index: number) => setCategoryId(index)} />
-				<Sort value={sortType} onChangeSort={(sortType: SortType) => setSortType(sortType)} />
+		  	<Categories value={categotyId} onClickCategory={(index: number) => dispatch(setCategoryId(index))} />
+				<Sort />
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">
