@@ -1,14 +1,15 @@
 import axios from "axios"
 import qs from "qs"
-import { FC, useContext, useEffect, useState } from "react"
+import { FC, useContext, useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import { SearchContext } from "../App"
 import { Categories } from "../components/Categories"
 import { Pagination } from "../components/Pagination/Pagination"
 import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
 import { Skeleton } from "../components/PizzaBlock/Skeleton"
-import { Sort } from "../components/Sort"
-import { setCategoryId, setCurrentPage } from "../redux/slices/filterSlice"
+import { Sort, sortList } from "../components/Sort"
+import { setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice"
 import { RootState } from "../redux/store"
 
 type ItemsType = {
@@ -24,16 +25,19 @@ type ItemsType = {
 
 export const Home: FC = () => {
 	const itemsLimit = 4
-
+	
   const [items, setItems] = useState<Array<ItemsType>>([])
 	const [isLoading, setIsloading] = useState(true)
 	const [itemsCount, setItemsCount] = useState(0)
+	const isSearch = useRef<boolean>(false)
+	const isMounted = useRef<boolean>(false)
 
-	const categotyId = useSelector((state: RootState) => state.filter.categoryId)
+	const categoryId = useSelector((state: RootState) => state.filter.categoryId)
 	const sortProperty = useSelector((state: RootState) => state.filter.sort.sortProperty)
 	const currentPage = useSelector((state: RootState) => state.filter.currentPage)
 
 	const dispatch = useDispatch()
+	const navigate = useNavigate()
 
 	const {searchValue} = useContext(SearchContext)
 
@@ -41,12 +45,17 @@ export const Home: FC = () => {
 		dispatch(setCurrentPage(value))
 	}
 
-	useEffect(() => {
+	const onChangeCategory = (value: number) => {
+		dispatch(setCategoryId(value))
+		dispatch(setCurrentPage(1))
+	}
+
+	const fetchPizzas = () => {
 		setIsloading(true)
 
 		const sortBy = sortProperty.replace('-', '')
 		const order = sortProperty.includes('-') ? 'asc' : 'desc'
-		const category = categotyId > 0 ? `&category=${categotyId}` : ''
+		const category = categoryId > 0 ? `&category=${categoryId}` : ''
 		const search = searchValue ? `&search=${searchValue}` : ''
 
 		axios
@@ -56,23 +65,50 @@ export const Home: FC = () => {
 				setItemsCount(response.data.count)
 				setIsloading(false)
 			})
-	}, [categotyId, sortProperty, searchValue, currentPage])
+	}
 
+	// Если был первый первый рендер, то проверяем url параметер и сохраняем в redux
 	useEffect(() => {
-		const queryString = qs.stringify({
-			categotyId: categotyId,
-			sortProperty: sortProperty,
-			searchValue: searchValue,
-			currentPage: currentPage,
-		})
-		console.log(queryString);
-		
-	}, [categotyId, sortProperty, searchValue, currentPage])
+		if(window.location.search) {
+			const params = qs.parse(window.location.search.substring(1))
+			const sort =  sortList.find(item => item.sortProperty === params.sortProperty) || sortList[0]
+			dispatch(setFilters({
+				categoryId: Number(params.categoryId),
+				currentPage: Number(params.currentPage),
+				sort
+			}))
+			isSearch.current = true
+		}
+	}, [dispatch])
+
+	// Если был первый рендер, то запрашиваем пиццы
+	useEffect(() => {
+		window.scrollTo(0, 0)
+
+		if (!isSearch.current) fetchPizzas()
+		isSearch.current = false
+
+	}, [categoryId, sortProperty, searchValue, currentPage])
+
+	// Если изменили параметры и был первый рендер
+	useEffect(() => {
+		if (isMounted.current) {
+			const queryString = qs.stringify({
+				categoryId: categoryId,
+				sortProperty: sortProperty,
+				searchValue: searchValue,
+				currentPage: currentPage,
+			})
+			
+			navigate('?'+queryString)
+		}
+		isMounted.current = true
+	}, [categoryId, sortProperty, searchValue, currentPage, navigate])
 
   return (
     <div className="container">
       <div className="content__top">
-		  	<Categories value={categotyId} onClickCategory={(index: number) => dispatch(setCategoryId(index))} />
+		  	<Categories value={categoryId} onClickCategory={onChangeCategory} />
 				<Sort />
 			</div>
 			<h2 className="content__title">Все пиццы</h2>

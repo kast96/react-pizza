@@ -3,19 +3,20 @@ import { useDispatch, useSelector } from "react-redux"
 import { setSort, SortType } from "../redux/slices/filterSlice"
 import { RootState } from "../redux/store"
 
+export const sortList = [
+	{name: 'сначала популярные', sortProperty: 'rating'},
+	{name: 'сначала не популярные', sortProperty: '-rating'},
+	{name: 'сначала дорогие', sortProperty: 'price'},
+	{name: 'сначала дешевые', sortProperty: '-price'},
+	{name: 'по алфавиту в обратном порядке', sortProperty: 'title'},
+	{name: 'по алфавиту', sortProperty: '-title'}
+] as Array<SortType>
+
 export const Sort: FC = () => {
 	const sort = useSelector((state: RootState) => state.filter.sort)
 	const dispatch = useDispatch()
 
 	const [open, setOpen] = useState(false)
-	const list = [
-		{name: 'сначала популярные', sortProperty: 'rating'},
-		{name: 'сначала не популярные', sortProperty: '-rating'},
-		{name: 'сначала дорогие', sortProperty: 'price'},
-		{name: 'сначала дешевые', sortProperty: '-price'},
-		{name: 'по алфавиту в обратном порядке', sortProperty: 'title'},
-		{name: 'по алфавиту', sortProperty: '-title'}
-	]
 	
 	const onClickListItem = (sort: SortType) => {
 		dispatch(setSort(sort))
@@ -37,7 +38,7 @@ export const Sort: FC = () => {
 			{open &&
 				<div className="sort__popup">
 					<ul>
-						{list.map((item, key) => 
+						{sortList.map((item, key) => 
 							<li key={item.sortProperty} className={item.sortProperty === sort.sortProperty ? 'active' : ''} onClick={() => onClickListItem(item)}>{item.name}</li>
 						)}
 					</ul>
