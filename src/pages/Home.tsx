@@ -1,4 +1,5 @@
 import axios from "axios"
+import qs from "qs"
 import { FC, useContext, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { SearchContext } from "../App"
@@ -55,6 +56,17 @@ export const Home: FC = () => {
 				setItemsCount(response.data.count)
 				setIsloading(false)
 			})
+	}, [categotyId, sortProperty, searchValue, currentPage])
+
+	useEffect(() => {
+		const queryString = qs.stringify({
+			categotyId: categotyId,
+			sortProperty: sortProperty,
+			searchValue: searchValue,
+			currentPage: currentPage,
+		})
+		console.log(queryString);
+		
 	}, [categotyId, sortProperty, searchValue, currentPage])
 
   return (
