@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { CartEmpty } from "../components/Cartempty"
 import { CartItem } from "../components/CartItem"
-import { clearItem, removeItem } from "../redux/slices/cartSlice"
+import { clearItem } from "../redux/slices/cartSlice"
 import { RootState } from "../redux/store"
 
 export const Cart = () => {
