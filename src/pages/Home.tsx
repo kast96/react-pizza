@@ -119,7 +119,7 @@ export const Home: FC = () => {
 					)
 				}
 				{!isLoading &&
-					items.map(pizza => <PizzaBlock key={pizza.id} title={pizza.title} price={pizza.price} imageUrl={pizza.imageUrl} sizes={pizza.sizes} types={pizza.types} />)
+					items.map(pizza => <PizzaBlock key={pizza.id} id={pizza.id} title={pizza.title} price={pizza.price} imageUrl={pizza.imageUrl} sizes={pizza.sizes} types={pizza.types} />)
 				}
 		  </div>
 			<Pagination itemsLimit={itemsLimit} itemsCount={itemsCount} currentPage={currentPage} onChangePage={number => onChangePage(number)} />
