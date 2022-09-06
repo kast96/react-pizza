@@ -1,4 +1,3 @@
-import axios from "axios"
 import qs from "qs"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -10,33 +9,21 @@ import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
 import { Skeleton } from "../components/PizzaBlock/Skeleton"
 import { Sort, sortList } from "../components/Sort"
 import { setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice"
-import { RootState } from "../redux/store"
-
-type ItemsType = {
-	id: number
-	imageUrl: string
-	title: string
-	types: Array<number>
-	sizes: Array<number>
-	price: number
-	category: number
-	rating: number
-}
+import { fetchPizzas } from "../redux/slices/pizzasSlice"
+import { AppDispatch, RootState } from "../redux/store"
 
 export const Home: FC = () => {
 	const itemsLimit = 4
 	
-  const [items, setItems] = useState<Array<ItemsType>>([])
-	const [isLoading, setIsloading] = useState(true)
-	const [itemsCount, setItemsCount] = useState(0)
 	const isSearch = useRef<boolean>(false)
 	const isMounted = useRef<boolean>(false)
 
 	const categoryId = useSelector((state: RootState) => state.filter.categoryId)
 	const sortProperty = useSelector((state: RootState) => state.filter.sort.sortProperty)
 	const currentPage = useSelector((state: RootState) => state.filter.currentPage)
+	const {items, itemsCount, status} = useSelector((state: RootState) => state.pizzas)
 
-	const dispatch = useDispatch()
+	const dispatch = useDispatch<AppDispatch>()
 	const navigate = useNavigate()
 
 	const {searchValue} = useContext(SearchContext)
@@ -50,21 +37,15 @@ export const Home: FC = () => {
 		dispatch(setCurrentPage(1))
 	}
 
-	const fetchPizzas = () => {
-		setIsloading(true)
-
+	const getPizzas = async () => {
 		const sortBy = sortProperty.replace('-', '')
 		const order = sortProperty.includes('-') ? 'asc' : 'desc'
 		const category = categoryId > 0 ? `&category=${categoryId}` : ''
 		const search = searchValue ? `&search=${searchValue}` : ''
 
-		axios
-			.get(`https://63085e6b722029d9ddcd2b4a.mockapi.io/items?page=${currentPage}&limit=${itemsLimit}${category}&sortBy=${sortBy}&order=${order}${search}`)
-			.then((response) => {
-				setItems(response.data.items)
-				setItemsCount(response.data.count)
-				setIsloading(false)
-			})
+		dispatch(fetchPizzas({sortBy, order, category, search, currentPage, itemsLimit}))
+		
+		window.scrollTo(0, 0)
 	}
 
 	// Если был первый первый рендер, то проверяем url параметер и сохраняем в redux
@@ -85,7 +66,7 @@ export const Home: FC = () => {
 	useEffect(() => {
 		window.scrollTo(0, 0)
 
-		if (!isSearch.current) fetchPizzas()
+		if (!isSearch.current) getPizzas()
 		isSearch.current = false
 
 	}, [categoryId, sortProperty, searchValue, currentPage])
@@ -113,13 +94,19 @@ export const Home: FC = () => {
 			</div>
 			<h2 className="content__title">Все пиццы</h2>
 			<div className="content__items">
-				{isLoading &&
+				{status === 'loading' &&
 					[...new Array(itemsLimit)].map((_, key) => 
 						<Skeleton key={key} />
 					)
 				}
-				{!isLoading &&
+				{status === 'success' &&
 					items.map(pizza => <PizzaBlock key={pizza.id} id={pizza.id} title={pizza.title} price={pizza.price} imageUrl={pizza.imageUrl} sizes={pizza.sizes} types={pizza.types} />)
+				}
+				{status === 'error' &&
+					<div className="content__error-info">
+						<h2>Произошла ошибка</h2>
+						<p>К сожалению, не удалось получить пиццы. Попробуйте повторить попытку позже</p>
+					</div>
 				}
 		  </div>
 			<Pagination itemsLimit={itemsLimit} itemsCount={itemsCount} currentPage={currentPage} onChangePage={number => onChangePage(number)} />
