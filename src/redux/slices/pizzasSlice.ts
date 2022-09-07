@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { RootState } from '../store'
 
 type FetchPizzasType = {
 	sortBy: string
@@ -69,6 +70,8 @@ export const pizzasSlice = createSlice({
 			})
 	}
 })
+
+export const selectPizzas = (state: RootState) => state.pizzas
 
 export const { setItems } = pizzasSlice.actions
 

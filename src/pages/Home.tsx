@@ -1,16 +1,15 @@
 import qs from "qs"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { SearchContext } from "../App"
 import { Categories } from "../components/Categories"
 import { Pagination } from "../components/Pagination/Pagination"
 import { PizzaBlock } from "../components/PizzaBlock/PizzaBlock"
 import { Skeleton } from "../components/PizzaBlock/Skeleton"
 import { Sort, sortList } from "../components/Sort"
-import { setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice"
-import { fetchPizzas } from "../redux/slices/pizzasSlice"
-import { AppDispatch, RootState } from "../redux/store"
+import { selectFilter, selectFilterSort, setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice"
+import { fetchPizzas, selectPizzas } from "../redux/slices/pizzasSlice"
+import { AppDispatch } from "../redux/store"
 
 export const Home: FC = () => {
 	const itemsLimit = 4
@@ -18,15 +17,12 @@ export const Home: FC = () => {
 	const isSearch = useRef<boolean>(false)
 	const isMounted = useRef<boolean>(false)
 
-	const categoryId = useSelector((state: RootState) => state.filter.categoryId)
-	const sortProperty = useSelector((state: RootState) => state.filter.sort.sortProperty)
-	const currentPage = useSelector((state: RootState) => state.filter.currentPage)
-	const {items, itemsCount, status} = useSelector((state: RootState) => state.pizzas)
+	const {categoryId, currentPage, searchValue} = useSelector(selectFilter)
+	const {sortProperty} = useSelector(selectFilterSort)
+	const {items, itemsCount, status} = useSelector(selectPizzas)
 
 	const dispatch = useDispatch<AppDispatch>()
 	const navigate = useNavigate()
-
-	const {searchValue} = useContext(SearchContext)
 
 	const onChangePage = (value: number) => {
 		dispatch(setCurrentPage(value))
@@ -56,7 +52,8 @@ export const Home: FC = () => {
 			dispatch(setFilters({
 				categoryId: Number(params.categoryId),
 				currentPage: Number(params.currentPage),
-				sort
+				sort,
+				searchValue
 			}))
 			isSearch.current = true
 		}
